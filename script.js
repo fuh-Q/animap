@@ -50,7 +50,7 @@ async function init() {
         container: "map",
     });
 
-    window.realFrameCounter = -1;
+    window.realFrameCounter = 0;
     window.map = map;
 
     if (!render) initRouteEditor(map);
@@ -65,7 +65,6 @@ async function init() {
         console.log("highest frame: ", highestFrame);
 
         while (animations.size && realFrameCounter <= ANIM_MAX_SECONDS * FPS) {
-            realFrameCounter++;
             animations.forEach((animation) => {
                 const thisOnefinished = animation.step();
                 if (thisOnefinished) animations.delete(animation);
@@ -79,6 +78,8 @@ async function init() {
                 await sleep(1);
                 await captureFrameTo(frames);
             }
+
+            realFrameCounter++;
         }
 
         document.title = "Finished";
