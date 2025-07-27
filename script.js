@@ -26,6 +26,21 @@ if (render) {
     });
 }
 
+/**
+ * @param {Blob[]} frames
+ */
+async function captureFrameTo(frames) {
+    map.triggerRepaint();
+    await new Promise((resolve) => {
+        map.once("render", () => {
+            map.getCanvas().toBlob((blob) => {
+                frames.push(blob);
+                resolve();
+            }, "image/jpeg");
+        });
+    });
+}
+
 async function init() {
     const map = new maplibregl.Map({
         style: "/positron.json",
@@ -49,11 +64,7 @@ async function init() {
         let highestFrame = Math.max(...[...animations].map((a) => a.endFrameIdx));
         console.log("highest frame: ", highestFrame);
 
-        while (true) {
-            if (!animations.size || realFrameCounter > ANIM_MAX_SECONDS * FPS) {
-                break;
-            }
-
+        while (animations.size && realFrameCounter <= ANIM_MAX_SECONDS * FPS) {
             realFrameCounter++;
             animations.forEach((animation) => {
                 const thisOnefinished = animation.step();
@@ -66,23 +77,13 @@ async function init() {
                 // idk why this matters but it helps keep the lines from acting drunk when they're moving quickly
                 // this is literally just sleeping for 1ms
                 await sleep(1);
-
-                map.triggerRepaint();
-                await new Promise((resolve) => {
-                    map.once("render", () => {
-                        map.getCanvas().toBlob((blob) => {
-                            frames.push(blob);
-                            resolve();
-                        }, "image/jpeg");
-                    });
-                });
+                await captureFrameTo(frames);
             }
         }
 
         document.title = "Finished";
 
         if (!render) return;
-
         const zip = new JSZip();
         frames.forEach((blob, index) => {
             zip.file(`frame_${String(index).padStart(4, "0")}.jpeg`, blob);
@@ -96,16 +97,9 @@ async function init() {
         a.download = "frames.zip";
         a.click();
 
-        // Clean up
+        // clean up
         URL.revokeObjectURL(url);
     });
-
-    // new maplibregl.Popup({
-    //     closeOnClick: false,
-    // })
-    //     .setLngLat(location)
-    //     .setHTML("<h3>You are approximately here!</h3>")
-    //     .addTo(map);
 
     map.on("click", (e) => {
         console.log(`clicked at: (${e.lngLat.lng}, ${e.lngLat.lat})`);
