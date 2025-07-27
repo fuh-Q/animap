@@ -1,0 +1,116 @@
+import "https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js";
+import "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js";
+
+import animationInitializer from "./animations.js";
+import { initRouteEditor } from "./route-editor.js";
+import { FPS } from "./drawing.js";
+import { sleep } from "./utils.js";
+
+const render = document.cookie.startsWith("render");
+
+document.addEventListener("keyup", (e) => {
+    if (!e.ctrlKey || !e.key === "Enter") return;
+    if (!render) document.cookie = "render";
+    location.reload();
+});
+
+if (render) {
+    document.cookie = "";
+    document.title = "0 / 0";
+    document.querySelector("link[rel~='icon']").href =
+        "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔴</text></svg>";
+    document.getElementById("rendererStatus").style.opacity = 1;
+    document.addEventListener("keyup", (e) => {
+        if (!e.ctrlKey || !e.key === "Enter") return;
+        location.reload();
+    });
+}
+
+async function init() {
+    const map = new maplibregl.Map({
+        style: "/positron.json",
+        attributionControl: false,
+        center: [-75.6975406016469, 45.411484269277736],
+        zoom: 6,
+        container: "map",
+    });
+
+    window.realFrameCounter = -1;
+    window.map = map;
+
+    if (!render) initRouteEditor(map);
+
+    map.on("load", async () => {
+        const ANIM_MAX_SECONDS = Infinity;
+        let animations = await animationInitializer();
+
+        const frames = [];
+
+        let highestFrame = Math.max(...[...animations].map((a) => a.endFrameIdx));
+        console.log("highest frame: ", highestFrame);
+
+        while (true) {
+            if (!animations.size || realFrameCounter > ANIM_MAX_SECONDS * FPS) {
+                break;
+            }
+
+            realFrameCounter++;
+            animations.forEach((animation) => {
+                const thisOnefinished = animation.step();
+                if (thisOnefinished) animations.delete(animation);
+            });
+
+            document.title = `${realFrameCounter} / ~${highestFrame}`;
+            if (!render) await sleep((1 / FPS) * 1000);
+            else {
+                // idk why this matters but it helps keep the lines from acting drunk when they're moving quickly
+                // this is literally just sleeping for 1ms
+                await sleep(1);
+
+                map.triggerRepaint();
+                await new Promise((resolve) => {
+                    map.once("render", () => {
+                        map.getCanvas().toBlob((blob) => {
+                            frames.push(blob);
+                            resolve();
+                        }, "image/jpeg");
+                    });
+                });
+            }
+        }
+
+        document.title = "Finished";
+
+        if (!render) return;
+
+        const zip = new JSZip();
+        frames.forEach((blob, index) => {
+            zip.file(`frame_${String(index).padStart(4, "0")}.jpeg`, blob);
+        });
+
+        const content = await zip.generateAsync({ type: "blob" });
+        const url = URL.createObjectURL(content);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "frames.zip";
+        a.click();
+
+        // Clean up
+        URL.revokeObjectURL(url);
+    });
+
+    // new maplibregl.Popup({
+    //     closeOnClick: false,
+    // })
+    //     .setLngLat(location)
+    //     .setHTML("<h3>You are approximately here!</h3>")
+    //     .addTo(map);
+
+    map.on("click", (e) => {
+        console.log(`clicked at: (${e.lngLat.lng}, ${e.lngLat.lat})`);
+        navigator.clipboard.writeText(`${e.lngLat.lng}, ${e.lngLat.lat}`);
+    });
+}
+
+init();
