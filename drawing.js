@@ -454,6 +454,7 @@ export class Blink {
 }
 
 /**
+ * WARNING - DO NOT use `newBearing` in an overlapping timeframe with `IdleRotation`
  * @implements {import("./types").Animation}
  */
 export class MapViewAdjustment {
@@ -476,17 +477,30 @@ export class MapViewAdjustment {
     /**@type {number} */
     currentPitch;
 
+    /**@type {number} */
+    dBearing;
+    /**@type {number} */
+    currentBearing;
+
     /**
      * @param {import("./types").MapViewAdjustmentOpts} opts
      */
     constructor(opts) {
-        const { startAtTimeSec, newPanCoords, newZoom, newPitch, seconds = 2 } = opts;
+        const {
+            startAtTimeSec,
+            newPanCoords,
+            newZoom,
+            newPitch,
+            newBearing_AlsoImSureImUsingThisSafely,
+            seconds = 2,
+        } = opts;
         this.startOnFrame = Math.round(startAtTimeSec * FPS);
         this.totalFrameCount = Math.ceil(seconds * FPS) || 1;
         this.seconds = seconds;
         this.newPanCoords = newPanCoords;
         this.newZoom = newZoom;
         this.newPitch = newPitch;
+        this.newBearing = newBearing_AlsoImSureImUsingThisSafely;
     }
 
     frameZeroSetup() {
@@ -506,6 +520,11 @@ export class MapViewAdjustment {
             const pitch = map.getPitch();
             this.dPitch = this.newPitch - pitch;
             this.currentPitch = pitch;
+        }
+        if (this.newBearing !== undefined) {
+            const bearing = map.getBearing();
+            this.dBearing = this.newBearing - bearing;
+            this.currentBearing = bearing;
         }
     }
 
@@ -535,6 +554,7 @@ export class MapViewAdjustment {
             if (this.newPanCoords) map.setCenter(this.newPanCoords);
             if (this.newZoom) map.setZoom(this.newZoom);
             if (this.newPitch !== undefined) map.setPitch(this.newPitch);
+            if (this.newBearing !== undefined) map.setBearing(this.newBearing);
             return ANIM_END;
         }
 
@@ -551,6 +571,10 @@ export class MapViewAdjustment {
         if (this.newPitch !== undefined) {
             this.currentPitch += additionalPercent * this.dPitch;
             map.setPitch(this.currentPitch);
+        }
+        if (this.newBearing !== undefined) {
+            this.currentBearing += additionalPercent * this.dBearing;
+            map.setBearing(this.currentBearing);
         }
 
         return ANIM_CONTINUE;

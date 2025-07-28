@@ -54,6 +54,7 @@ type MapViewAdjustmentOpts = {
     newPanCoords?: [number, number];
     newZoom?: number;
     newPitch?: number;
+    newBearing_AlsoImSureImUsingThisSafely?: number;
     seconds?: number;
 };
 
