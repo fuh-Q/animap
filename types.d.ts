@@ -54,18 +54,28 @@ type MapViewAdjustmentOpts = {
     newPanCoords?: [number, number];
     newZoom?: number;
     newPitch?: number;
-    newBearing_AlsoImSureImUsingThisSafely?: number;
     seconds?: number;
 };
 
-type IdleRotationOpts = {
-    startAtTimeSec: NonZeroNumber;
-    direction: "clockwise" | "counterclockwise";
+type IdleRotation = {
+    type: "idle";
     idleDegreesPerFrame: NonZeroNumber;
     idleSeconds: NonZeroNumber;
     postIdleSeconds: NonZeroNumber;
     easeConstantSplit?: [NonZeroNumber, NonZeroNumber];
 };
+
+type MapViewAdjustmentRotation = {
+    type: "mapviewadjustment";
+    newBearing: number;
+    seconds?: number;
+};
+
+type RotationOpts = {
+    startAtTimeSec: NonZeroNumber;
+    type: string;
+    direction: "clockwise" | "counterclockwise";
+} & (IdleRotation | MapViewAdjustmentRotation);
 
 type PopOpts = {
     startAtTimeSec: NonZeroNumber;

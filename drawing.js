@@ -454,7 +454,6 @@ export class Blink {
 }
 
 /**
- * WARNING - DO NOT use `newBearing` in an overlapping timeframe with `IdleRotation`
  * @implements {import("./types").Animation}
  */
 export class MapViewAdjustment {
@@ -477,30 +476,17 @@ export class MapViewAdjustment {
     /**@type {number} */
     currentPitch;
 
-    /**@type {number} */
-    dBearing;
-    /**@type {number} */
-    currentBearing;
-
     /**
      * @param {import("./types").MapViewAdjustmentOpts} opts
      */
     constructor(opts) {
-        const {
-            startAtTimeSec,
-            newPanCoords,
-            newZoom,
-            newPitch,
-            newBearing_AlsoImSureImUsingThisSafely,
-            seconds = 2,
-        } = opts;
+        const { startAtTimeSec, newPanCoords, newZoom, newPitch, seconds = 2 } = opts;
         this.startOnFrame = Math.round(startAtTimeSec * FPS);
         this.totalFrameCount = Math.ceil(seconds * FPS) || 1;
         this.seconds = seconds;
         this.newPanCoords = newPanCoords;
         this.newZoom = newZoom;
         this.newPitch = newPitch;
-        this.newBearing = newBearing_AlsoImSureImUsingThisSafely;
     }
 
     frameZeroSetup() {
@@ -520,11 +506,6 @@ export class MapViewAdjustment {
             const pitch = map.getPitch();
             this.dPitch = this.newPitch - pitch;
             this.currentPitch = pitch;
-        }
-        if (this.newBearing !== undefined) {
-            const bearing = map.getBearing();
-            this.dBearing = this.newBearing - bearing;
-            this.currentBearing = bearing;
         }
     }
 
@@ -554,7 +535,6 @@ export class MapViewAdjustment {
             if (this.newPanCoords) map.setCenter(this.newPanCoords);
             if (this.newZoom) map.setZoom(this.newZoom);
             if (this.newPitch !== undefined) map.setPitch(this.newPitch);
-            if (this.newBearing !== undefined) map.setBearing(this.newBearing);
             return ANIM_END;
         }
 
@@ -572,10 +552,6 @@ export class MapViewAdjustment {
             this.currentPitch += additionalPercent * this.dPitch;
             map.setPitch(this.currentPitch);
         }
-        if (this.newBearing !== undefined) {
-            this.currentBearing += additionalPercent * this.dBearing;
-            map.setBearing(this.currentBearing);
-        }
 
         return ANIM_CONTINUE;
     }
@@ -584,37 +560,61 @@ export class MapViewAdjustment {
 /**
  * @implements {import("./types").Animation}
  */
-export class IdleRotation {
+export class Rotation {
     /**@type {number} */
     ogBearing;
     /**@type {number} */
     postIdleRotateDegrees;
 
     /**
-     * @param {import("./types").IdleRotationOpts} opts
+     * @param {import("./types").RotationOpts} opts
      */
     constructor(opts) {
+        const { startAtTimeSec, type, direction } = opts;
+        this.startOnFrame = Math.round(startAtTimeSec * FPS);
+        this.direction = direction === "counterclockwise" ? 1 : -1;
+        this.type = type;
+
+        switch (type) {
+            case "idle":
+                this.initIdle(opts);
+                break;
+            case "mapviewadjustment":
+                this.initMapViewAdjustment(opts);
+                break;
+        }
+    }
+
+    /**
+     * @param {import("./types").IdleRotation} opts
+     */
+    initIdle(opts) {
         const {
-            startAtTimeSec,
-            direction,
             idleDegreesPerFrame,
             idleSeconds,
             postIdleSeconds,
             easeConstantSplit: [preIdle, idle] = [0.4, 0.6],
         } = opts;
 
-        this.startOnFrame = Math.round(startAtTimeSec * FPS);
-        this.direction = direction === "counterclockwise" ? 1 : -1;
-
         this.preIdleFrameCount = Math.round(FPS * idleSeconds * preIdle);
         this.idleFrameCount = Math.round(FPS * idleSeconds * idle);
         this.postIdleFrameCount = Math.round(FPS * postIdleSeconds);
 
-        this.totalFrameCount =
-            this.preIdleFrameCount + this.idleFrameCount + this.postIdleFrameCount;
+        let sum = this.preIdleFrameCount + this.idleFrameCount + this.postIdleFrameCount;
+        this.totalFrameCount = sum;
 
         this.postIdleStart = this.totalFrameCount - this.postIdleFrameCount;
         this.idleDegreesPerFrame = idleDegreesPerFrame;
+    }
+
+    /**
+     * @param {import("./types").MapViewAdjustmentRotation} opts
+     */
+    initMapViewAdjustment(opts) {
+        const { newBearing, seconds = 3 } = opts;
+        this.newBearing = newBearing;
+        this.seconds = seconds;
+        this.totalFrameCount = Math.round(FPS * seconds);
     }
 
     get frameIdx() {
@@ -639,7 +639,7 @@ export class IdleRotation {
      * @see https://www.desmos.com/calculator/lky9hvirck
      * @param {number} x
      */
-    percentage(x) {
+    percentageIdle(x) {
         switch (this.currentPhase) {
             case this.PRE_IDLE:
                 return Math.pow(Math.sin((Math.PI / (2 * this.preIdleFrameCount)) * x), 2);
@@ -654,19 +654,44 @@ export class IdleRotation {
         }
     }
 
-    frameZeroSetup() {
+    /**
+     * @param {number} x
+     */
+    percentageMapView(x) {
+        return (
+            (2 / this.totalFrameCount) * Math.pow(Math.sin((Math.PI / this.totalFrameCount) * x), 2)
+        );
+    }
+
+    get percentage() {
+        return this.type === "idle" ? this.percentageIdle : this.percentageMapView;
+    }
+
+    frameZeroSetupMapView() {
+        const bearing = map.getBearing();
+        this.dBearing = this.newBearing - bearing;
+        this.currentBearing = bearing;
+
+        if (this.seconds === 0) {
+            map.setBearing(this.newBearing);
+            return ANIM_END;
+        }
+    }
+
+    frameZeroSetupIdle() {
         this.ogBearing = map.getBearing();
+    }
+
+    get frameZeroSetup() {
+        return this.type === "idle" ? this.frameZeroSetupIdle : this.frameZeroSetupMapView;
     }
 
     postIdleSetup() {
         this.postIdleRotateDegrees = -this.direction * Math.abs(map.getBearing() - this.ogBearing);
     }
 
-    step() {
-        if (this.frameIdx < 0) return ANIM_CONTINUE;
-        if (this.frameIdx === 0) this.frameZeroSetup();
+    stepIdle() {
         if (this.frameIdx === this.postIdleStart) this.postIdleSetup();
-        if (this.frameIdx >= this.totalFrameCount) return ANIM_END;
 
         const additionalPercent = this.percentage(this.frameIdx + 1);
         const toTurn =
@@ -675,6 +700,23 @@ export class IdleRotation {
                 : this.direction * this.postIdleRotateDegrees * additionalPercent;
 
         map.setBearing(map.getBearing() + toTurn);
+        return ANIM_CONTINUE;
+    }
+
+    stepMapView() {
+        this.currentBearing += this.percentage(this.frameIdx + 1) * this.dBearing;
+        map.setBearing(this.currentBearing);
+        return ANIM_CONTINUE;
+    }
+
+    step() {
+        if (this.frameIdx < 0) return ANIM_CONTINUE;
+        if (this.frameIdx === 0) this.frameZeroSetup();
+        if (this.frameIdx >= this.totalFrameCount) return ANIM_END;
+
+        const finished = this.type === "idle" ? this.stepIdle() : this.stepMapView();
+        if (finished) return ANIM_END;
+
         return ANIM_CONTINUE;
     }
 }

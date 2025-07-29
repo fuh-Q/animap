@@ -4,7 +4,7 @@ import {
     DottedLineAnimation,
     Blink,
     MapViewAdjustment,
-    IdleRotation,
+    Rotation,
     Pop,
 } from "./drawing.js";
 
@@ -149,8 +149,7 @@ async function Anim1() {
         [-75.61381961158257, 45.39025228389903],
     ];
 
-    let img = await map.loadImage("lines.png");
-    map.addImage("balls", img.data);
+    map.addImage("balls", (await map.loadImage("./assets/lines.png")).data);
     map.addSource("image", {
         type: "geojson",
         data: {
@@ -177,6 +176,13 @@ async function Anim1() {
             startAtTimeSec: 0,
             newZoom: 14,
             newPitch: 45,
+            seconds: 3,
+        }),
+        new Rotation({
+            startAtTimeSec: 0,
+            type: "mapviewadjustment",
+            direction: "counterclockwise",
+            newBearing: 15,
             seconds: 3,
         }),
         new InflateDeflate({ startAtTimeSec: 3, layerId: "lineLayer", totalSeconds: 5 }),
@@ -220,8 +226,9 @@ async function Anim1() {
             layerId: "imageLayer",
             finalScale: 0.04,
         }),
-        new IdleRotation({
+        new Rotation({
             startAtTimeSec: 11,
+            type: "idle",
             direction: "counterclockwise",
             idleDegreesPerFrame: 0.1,
             idleSeconds: 5,
