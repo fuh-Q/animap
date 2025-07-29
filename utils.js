@@ -27,9 +27,11 @@ export function hex(len) {
 }
 
 /**
- * @param {number} ms
+ * if the special string is supplied this function will refer to requestAnimationFrame instead of setTimeout
+ * @param {number | "requestAnimationFrame"} x
  * @returns {Promise<void>}
  */
-export function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+export function sleep(x) {
+    const callback = isNaN(x) ? (res) => requestAnimationFrame(res) : (res) => setTimeout(res, ms);
+    return new Promise(callback);
 }

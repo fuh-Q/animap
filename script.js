@@ -71,7 +71,7 @@ async function init() {
             });
 
             document.title = `${realFrameCounter} / ~${highestFrame}`;
-            if (!render) await sleep((1 / FPS) * 1000);
+            if (!render) await sleep("requestAnimationFrame");
             else {
                 // idk why this matters but it helps keep the lines from acting drunk when they're moving quickly
                 // this is literally just sleeping for 1ms
