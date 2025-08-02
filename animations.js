@@ -8,8 +8,10 @@ import {
     Pop,
 } from "./drawing.js";
 
+let exportedAnimation;
+
 /**@returns {Promise<Set<import("./types").Animation>>} */
-async function Anim1() {
+exportedAnimation = async function () {
     const newGeojsonSource = () => {
         return {
             type: "geojson",
@@ -235,6 +237,6 @@ async function Anim1() {
             postIdleSeconds: 3,
         }),
     ]);
-}
+};
 
-export default Anim1;
+export default exportedAnimation;
