@@ -32,6 +32,6 @@ export function hex(len) {
  * @returns {Promise<void>}
  */
 export function sleep(x) {
-    const callback = isNaN(x) ? (res) => requestAnimationFrame(res) : (res) => setTimeout(res, ms);
+    const callback = isNaN(x) ? (res) => requestAnimationFrame(res) : (res) => setTimeout(res, x);
     return new Promise(callback);
 }
