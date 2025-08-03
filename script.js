@@ -102,6 +102,13 @@ async function init() {
         URL.revokeObjectURL(url);
     });
 
+    map.on("zoom", (_) => {
+        if (render) return;
+        document.getElementById("zoom").innerText = `zoom: ${
+            Math.round(map.getZoom() * 100) / 100
+        }`;
+    });
+
     map.on("click", (e) => {
         console.log(`clicked at: (${e.lngLat.lng}, ${e.lngLat.lat})`);
         navigator.clipboard.writeText(`${e.lngLat.lng}, ${e.lngLat.lat}`);
