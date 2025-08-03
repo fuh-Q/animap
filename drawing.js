@@ -383,7 +383,7 @@ export class Blink {
     }
 
     get endFrameIdx() {
-        return this.startOnFrame + (this.ringCount - 1) * this.delay + this.frameCountPerRing;
+        return this.startOnFrame + (this.ringCount - 1) * this.delay + this.frameCountPerRing + 1;
     }
 
     /**
@@ -443,12 +443,12 @@ export class Blink {
 
     step() {
         if (this.frameIdx < 0) return ANIM_CONTINUE;
-        if (this.frameIdx > (this.ringCount - 1) * this.delay + this.frameCountPerRing)
+        if (this.frameIdx > (this.ringCount - 1) * this.delay + this.frameCountPerRing + 1)
             return ANIM_END;
 
         Object.values(this.rings).forEach((ringStep) => ringStep());
 
-        if (this.frameIdx > (this.ringCount - 1) * this.delay + this.frameCountPerRing) {
+        if (this.frameIdx > (this.ringCount - 1) * this.delay + this.frameCountPerRing + 1) {
             Object.keys(this.rings).forEach((k) => map.removeLayer(k));
             return ANIM_END;
         }
