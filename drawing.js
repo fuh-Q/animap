@@ -356,6 +356,7 @@ export class Blink {
             rings = 1,
             radius = 50,
             delay = 0.2 * FPS,
+            ringLayerBefore,
         } = opts;
 
         this.frameCountPerRing = secondsPerRing * FPS;
@@ -364,6 +365,7 @@ export class Blink {
         this.sourceId = sourceId;
         this.radius = radius;
         this.delay = delay;
+        this.ringLayerBefore = ringLayerBefore;
 
         this.maxStroke = Math.sqrt(radius);
 
@@ -413,12 +415,14 @@ export class Blink {
             "circle-stroke-width": 0,
         };
 
-        map.addLayer({
+        const layer = {
             id: layerId,
             source: this.sourceId,
             type: "circle",
             paint,
-        });
+        };
+
+        map.addLayer(layer, this.ringLayerBefore);
 
         function renderStep() {
             if (

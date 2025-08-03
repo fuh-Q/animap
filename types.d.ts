@@ -47,6 +47,7 @@ type BlinkOpts = {
     rings?: NonZeroNumber;
     radius?: NonZeroNumber;
     delay?: NonZeroNumber;
+    ringLayerBefore?: string;
 };
 
 type MapViewAdjustmentOpts = {
