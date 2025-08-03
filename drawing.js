@@ -1,4 +1,4 @@
-import { findLayer, findSource, hex } from "./utils.js";
+import { findLayer, hex } from "./utils.js";
 
 export const FPS = document.cookie.startsWith("render") ? 60 : 60;
 export const ANIM_CONTINUE = false;
@@ -308,7 +308,6 @@ export class InflateDeflate {
         this.totalFrameCount = totalSeconds ? totalSeconds * FPS : null;
 
         this.layerId = layerId;
-        this.layer = findLayer(map, layerId);
     }
 
     get frameIdx() {
@@ -331,11 +330,8 @@ export class InflateDeflate {
         if (this.totalFrameCount !== null && realFrameCounter >= this.totalFrameCount)
             return ANIM_END;
 
-        map.setPaintProperty(
-            this.layerId,
-            "line-width",
-            this.layer.paint["line-width"] * this.width(this.frameIdx + 1)
-        );
+        const width = map.getPaintProperty(this.layerId, "line-width");
+        map.setPaintProperty(this.layerId, "line-width", width * this.width(this.frameIdx + 1));
 
         return ANIM_CONTINUE;
     }
@@ -785,6 +781,9 @@ export class Pop {
  * @implements {import("./types").Animation}
  */
 export class LinearAdjustNumericPaintProp {
+    /**@type {number} */
+    oldValue;
+
     /**
      * @param {import("./types").LinearAdjustOpts} opts
      */
@@ -795,8 +794,11 @@ export class LinearAdjustNumericPaintProp {
 
         this.layerId = layerId;
         this.paintProperty = paintProperty;
-        this.oldValue = findLayer(map, layerId).paint[paintProperty];
         this.newValue = newValue;
+    }
+
+    frameZeroSetup() {
+        this.oldValue = map.getPaintProperty(this.layerId, this.paintProperty);
     }
 
     get frameIdx() {
@@ -816,6 +818,7 @@ export class LinearAdjustNumericPaintProp {
 
     step() {
         if (this.frameIdx < 0) return ANIM_CONTINUE;
+        if (this.frameIdx === 0) this.frameZeroSetup();
         if (this.frameIdx >= this.totalFrameCount) return ANIM_END;
 
         map.setPaintProperty(
