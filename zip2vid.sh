@@ -21,3 +21,7 @@ cd ..
 rm -rfd $DIRNAME
 
 echo "exported to renders/$OUT_NAME"
+
+if [ "$2" != "--no-consume" ]; then
+    rm "$PATH_TO_ZIP"
+fi
