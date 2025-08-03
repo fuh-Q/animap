@@ -43,7 +43,7 @@ type InflateDeflateOpts = {
 type BlinkOpts = {
     startAtTimeSec: NonZeroNumber;
     sourceId: string;
-    seconds?: NonZeroNumber;
+    secondsPerRing?: NonZeroNumber;
     rings?: NonZeroNumber;
     radius?: NonZeroNumber;
     delay?: NonZeroNumber;
