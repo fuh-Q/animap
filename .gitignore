@@ -1,6 +1,7 @@
 node_modules/
 .vscode/
 **/*.mp4
-**/*.png
+assets/*.png
 **/*.jpeg
 **/*.jpg
+venv/
