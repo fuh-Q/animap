@@ -1,4 +1,4 @@
-import mapboxgl from "maplibre-gl";
+import mapboxgl, { SymbolPaint } from "maplibre-gl";
 
 declare global {
     var map: mapboxgl.Map;
@@ -92,7 +92,21 @@ type PopOpts = {
 type LinearAdjustOpts = {
     startAtTimeSec: NonZeroNumber;
     layerId: string;
-    paintProperty: string;
+    paintProperty: keyof SymbolPaint;
     newValue: number;
     seconds?: number;
+};
+
+type SetSourceCoordsOpts = {
+    startAtTimeSec: NonZeroNumber;
+    sourceId: string;
+    newCoords: [number, number];
+};
+
+type AddImageOpts = {
+    imgName: string;
+    coords: [number, number];
+    layoutOverrides?: mapboxgl.SymbolLayout;
+    paint?: mapboxgl.SymbolPaint;
+    beforeLayer?: string;
 };
