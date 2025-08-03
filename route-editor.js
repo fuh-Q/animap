@@ -52,7 +52,7 @@ export function initRouteEditor(map) {
 
     document.addEventListener("keyup", (e) => {
         console.log("e ", e.ctrlKey, e.key);
-        if (!(e.ctrlKey && e.key === "z") && e.key !== "x" && !editorEnabled) return;
+        if ((!(e.ctrlKey && e.key === "z") && e.key !== "x") || !editorEnabled) return;
 
         console.log("balls");
         const src = map.getSource("editor-points");
