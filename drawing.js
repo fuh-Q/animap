@@ -17,7 +17,7 @@ export class LineAnimation {
             sourceId,
             coords,
             seconds = 5,
-            headPointId,
+            headPointSourceId,
             maxTrailingPoints,
         } = opts;
         this.totalFrameCount = Math.ceil(seconds * FPS) || 1;
@@ -25,14 +25,14 @@ export class LineAnimation {
         this.startOnFrame = Math.round(startAtTimeSec * FPS);
         this.coords = coords;
         this.seconds = seconds;
-        this.headPointId = headPointId;
+        this.headPointSourceId = headPointSourceId;
 
         this.src = map.getSource(sourceId);
-        this.headSrc = headPointId ? map.getSource(headPointId) : undefined;
+        this.headSrc = headPointSourceId ? map.getSource(headPointSourceId) : undefined;
         this.maxTrail = maxTrailingPoints;
 
         this.src._data.geometry.coordinates.push(coords[0]);
-        if (headPointId) this.headSrc._data.geometry.coordinates = coords[0];
+        if (headPointSourceId) this.headSrc._data.geometry.coordinates = coords[0];
 
         /**@type {[number, number, number][]} */
         this.segments = new Array(coords.length - 1).fill(0);
@@ -116,7 +116,7 @@ export class LineAnimation {
         }
 
         if (this.segIdx >= this.segments.length) {
-            if (this.headPointId) {
+            if (this.headPointSourceId) {
                 this.headSrc._data.geometry.coordinates = this.coords[this.coords.length - 1];
                 this.headSrc.setData(this.headSrc._data);
             }
@@ -151,7 +151,7 @@ export class LineAnimation {
         this.src._data.geometry.coordinates.push([newLng, newLat]);
         this.src.setData(this.src._data);
 
-        if (this.headPointId) {
+        if (this.headPointSourceId) {
             this.headSrc._data.geometry.coordinates = [newLng, newLat];
             this.headSrc.setData(this.headSrc._data);
         }

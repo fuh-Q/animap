@@ -20,8 +20,7 @@ type DrawLineOpts = {
     sourceId: string;
     coords: [number, number][];
     seconds?: number;
-    animate?: boolean;
-    headPointId?: string;
+    headPointSourceId?: string;
     maxTrailingPoints?: NonZeroNumber;
 };
 
