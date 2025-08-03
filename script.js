@@ -9,9 +9,15 @@ import { sleep } from "./utils.js";
 const render = document.cookie.startsWith("render");
 
 document.addEventListener("keyup", (e) => {
-    if (!e.ctrlKey || !e.key === "Enter") return;
+    if (!(e.key === "Enter" && e.ctrlKey)) return;
     if (!render) document.cookie = "render";
     location.reload();
+});
+
+let stopAnim = false;
+document.addEventListener("keyup", (e) => {
+    if (e.key !== " ") return;
+    stopAnim = !stopAnim;
 });
 
 if (render) {
@@ -32,7 +38,7 @@ if (render) {
 async function captureFrameTo(frames) {
     map.triggerRepaint();
     await new Promise((resolve) => {
-        map.once("render", () => {
+        map.once("idle", () => {
             map.getCanvas().toBlob((blob) => {
                 frames.push(blob);
                 resolve();
@@ -65,6 +71,8 @@ async function init() {
         console.log("highest frame: ", highestFrame);
 
         while (animations.size && realFrameCounter <= ANIM_MAX_SECONDS * FPS) {
+            if (stopAnim) break;
+
             animations.forEach((animation) => {
                 const thisOnefinished = animation.step();
                 if (thisOnefinished) animations.delete(animation);
@@ -72,17 +80,11 @@ async function init() {
 
             document.title = `${realFrameCounter} / ~${highestFrame}`;
             if (!render) await sleep("requestAnimationFrame");
-            else {
-                // idk why this matters but it helps keep the lines from acting drunk when they're moving quickly
-                // this is literally just sleeping for 1ms
-                await sleep(1);
-                await captureFrameTo(frames);
-            }
-
+            else await captureFrameTo(frames);
             realFrameCounter++;
         }
 
-        document.title = "Finished";
+        if (!stopAnim) document.title = "Finished";
 
         if (!render) return;
         const zip = new JSZip();
