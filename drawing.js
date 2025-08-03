@@ -439,12 +439,12 @@ export class Blink {
 
     step() {
         if (this.frameIdx < 0) return ANIM_CONTINUE;
-        if (this.frameIdx > this.ringCount * this.delay + this.frameCountPerRing + FPS)
+        if (this.frameIdx > (this.ringCount - 1) * this.delay + this.frameCountPerRing)
             return ANIM_END;
 
         Object.values(this.rings).forEach((ringStep) => ringStep());
 
-        if (this.frameIdx > this.ringCount * this.delay * FPS + this.frameCountPerRing + FPS) {
+        if (this.frameIdx > (this.ringCount - 1) * this.delay + this.frameCountPerRing) {
             Object.keys(this.rings).forEach((k) => map.removeLayer(k));
             return ANIM_END;
         }
