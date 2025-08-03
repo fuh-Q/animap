@@ -107,6 +107,6 @@ type AddImageOpts = {
     imgName: string;
     coords: [number, number];
     layoutOverrides?: mapboxgl.SymbolLayout;
-    paint?: mapboxgl.SymbolPaint;
+    paintOverrides?: mapboxgl.SymbolPaint;
     beforeLayer?: string;
 };
