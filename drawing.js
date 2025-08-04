@@ -401,7 +401,7 @@ export class Blink {
      * @returns {[() => void, string]}
      */
     blinkOneRing(delayFrames) {
-        const layerId = `${this.sourceId}-${hex(8)}`;
+        const layerId = `${this.sourceId}-${hex(6)}`;
 
         const paint = {
             "circle-radius": 0,
