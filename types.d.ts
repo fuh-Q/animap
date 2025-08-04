@@ -105,7 +105,7 @@ type SetSourceCoordsOpts = {
 
 type AddImageOpts = {
     imgName: string;
-    coords: [number, number];
+    coords: [number, number] | [number, number][];
     layoutOverrides?: mapboxgl.SymbolLayout;
     paintOverrides?: mapboxgl.SymbolPaint;
     beforeLayer?: string;
