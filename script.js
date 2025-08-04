@@ -115,6 +115,12 @@ async function init() {
         console.log(`clicked at: (${e.lngLat.lng}, ${e.lngLat.lat})`);
         navigator.clipboard.writeText(`${e.lngLat.lng}, ${e.lngLat.lat}`);
     });
+
+    document.addEventListener("auxclick", (_) => {
+        const ctr = map.getCenter();
+        console.log(`copied center: (${ctr.lng}, ${ctr.lat})`);
+        navigator.clipboard.writeText(`${ctr.lng}, ${ctr.lat}`);
+    });
 }
 
 init();
