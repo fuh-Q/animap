@@ -669,7 +669,7 @@ export class Rotation {
 
     frameZeroSetupMapView() {
         const bearing = map.getBearing();
-        this.dBearing = this.newBearing - bearing;
+        this.dBearing = this.direction * (this.newBearing - bearing);
         this.currentBearing = bearing;
 
         if (this.seconds === 0) {
