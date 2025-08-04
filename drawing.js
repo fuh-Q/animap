@@ -673,7 +673,7 @@ export class Rotation {
         this.currentBearing = bearing;
 
         if (this.seconds === 0) {
-            map.setBearing(this.newBearing);
+            map.setBearing(this.direction * this.newBearing);
             return ANIM_END;
         }
     }
