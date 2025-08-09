@@ -39,10 +39,14 @@ async function captureFrameTo(frames) {
     map.triggerRepaint();
     await new Promise((resolve) => {
         map.once("idle", () => {
-            map.getCanvas().toBlob((blob) => {
-                frames.push(blob);
-                resolve();
-            }, "image/jpeg");
+            map.getCanvas().toBlob(
+                (blob) => {
+                    frames.push(blob);
+                    resolve();
+                },
+                "image/jpeg",
+                1.0
+            );
         });
     });
 }
@@ -54,7 +58,15 @@ async function init() {
         center: [-75.6975406016469, 45.411484269277736],
         zoom: 6,
         container: "map",
+        antialias: true,
     });
+
+    const canvas = map.getCanvas();
+    const scale = 3; // supersampling factor
+
+    canvas.width = canvas.clientWidth * scale;
+    canvas.height = canvas.clientHeight * scale;
+    map.resize();
 
     window.realFrameCounter = 0;
     window.map = map;
@@ -62,6 +74,7 @@ async function init() {
     if (!render) initRouteEditor(map);
 
     map.on("load", async () => {
+        console.log(map.painter.context.gl.getContextAttributes().antialias);
         const ANIM_MAX_SECONDS = Infinity;
         let animations = await animationInitializer();
 
@@ -87,6 +100,11 @@ async function init() {
         if (!stopAnim) document.title = "Finished";
 
         if (!render) return;
+
+        // for Kdenlive, allows me to freeze the last frame
+        await captureFrameTo(frames);
+        await captureFrameTo(frames);
+
         const zip = new JSZip();
         frames.forEach((blob, index) => {
             zip.file(`frame_${String(index).padStart(4, "0")}.jpeg`, blob);

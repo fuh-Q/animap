@@ -1510,7 +1510,7 @@
       "type": "symbol",
       "source": "openmaptiles",
       "source-layer": "place",
-      "minzoom": 3,
+      "minzoom": 0.01,
       "maxzoom": 13,
       "filter": [
         "all",

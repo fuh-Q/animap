@@ -19,20 +19,22 @@ export class LineAnimation {
             seconds = 5,
             headPointSourceId,
             maxTrailingPoints,
+            easing = true,
         } = opts;
-        this.totalFrameCount = Math.ceil(seconds * FPS) || 1;
+        this.totalFrameCount = Math.ceil(seconds * FPS) || 2;
 
         this.startOnFrame = Math.round(startAtTimeSec * FPS);
         this.coords = coords;
         this.seconds = seconds;
         this.headPointSourceId = headPointSourceId;
+        this._percentageFunc = easing ? this.percentageEasing : this.percentageLinear;
 
         this.src = map.getSource(sourceId);
         this.headSrc = headPointSourceId ? map.getSource(headPointSourceId) : undefined;
         this.maxTrail = maxTrailingPoints;
 
-        this.src._data.geometry.coordinates.push(coords[0]);
-        if (headPointSourceId) this.headSrc._data.geometry.coordinates = coords[0];
+        // this.src._data.geometry.coordinates.push(coords[0]);
+        // if (headPointSourceId) this.headSrc._data.geometry.coordinates = coords[0];
 
         /**@type {[number, number, number][]} */
         this.segments = new Array(coords.length - 1).fill(0);
@@ -80,10 +82,22 @@ export class LineAnimation {
      *
      * @param {number} x
      */
-    percentage(x) {
+    percentageEasing(x) {
         return (
             (2 / this.totalFrameCount) * Math.pow(Math.sin((Math.PI / this.totalFrameCount) * x), 2)
         );
+    }
+
+    /**
+     * @param {number} x
+     */
+    percentageLinear(x) {
+        const denominator = this.totalFrameCount * (this.totalFrameCount + 1);
+        return (2 / denominator) * x;
+    }
+
+    get percentage() {
+        return this._percentageFunc;
     }
 
     step() {
@@ -100,6 +114,7 @@ export class LineAnimation {
 
         let additionalDistance =
             this.seconds !== 0 ? this.percentage(x) * this.totalDist : this.totalDist;
+
         let [segLen, segDLng, segDLat] = this.segments[this.segIdx];
         let newSegCovered = this.segCoveredDistance + additionalDistance;
 
@@ -480,13 +495,21 @@ export class MapViewAdjustment {
      * @param {import("./types").MapViewAdjustmentOpts} opts
      */
     constructor(opts) {
-        const { startAtTimeSec, newPanCoords, newZoom, newPitch, seconds = 2 } = opts;
+        const {
+            startAtTimeSec,
+            newPanCoords,
+            newZoom,
+            newPitch,
+            seconds = 2,
+            easing = true,
+        } = opts;
         this.startOnFrame = Math.round(startAtTimeSec * FPS);
         this.totalFrameCount = Math.ceil(seconds * FPS) || 1;
         this.seconds = seconds;
         this.newPanCoords = newPanCoords;
         this.newZoom = newZoom;
         this.newPitch = newPitch;
+        this._percentageFunc = easing ? this.percentageEasing : this.percentageLinear;
     }
 
     frameZeroSetup() {
@@ -520,10 +543,22 @@ export class MapViewAdjustment {
     /**
      * @param {number} x
      */
-    percentage(x) {
+    percentageEasing(x) {
         return (
             (2 / this.totalFrameCount) * Math.pow(Math.sin((Math.PI / this.totalFrameCount) * x), 2)
         );
+    }
+
+    /**
+     * @param {number} x
+     */
+    percentageLinear(x) {
+        const denominator = this.totalFrameCount * (this.totalFrameCount + 1);
+        return (2 / denominator) * x;
+    }
+
+    get percentage() {
+        return this._percentageFunc;
     }
 
     step() {
@@ -574,6 +609,8 @@ export class Rotation {
         this.startOnFrame = Math.round(startAtTimeSec * FPS);
         this.direction = direction === "counterclockwise" ? 1 : -1;
         this.type = type;
+
+        this._percentageFunc = type === "idle" ? this.percentageIdle : this.percentageMapView;
 
         switch (type) {
             case "idle":
@@ -651,6 +688,9 @@ export class Rotation {
                     (2 * Math.pow(Math.sin((Math.PI / this.postIdleFrameCount) * realX), 2)) /
                     this.postIdleFrameCount
                 );
+            default:
+                // unreachable
+                return 0;
         }
     }
 
@@ -664,7 +704,7 @@ export class Rotation {
     }
 
     get percentage() {
-        return this.type === "idle" ? this.percentageIdle : this.percentageMapView;
+        return this._percentageFunc;
     }
 
     frameZeroSetupMapView() {
@@ -736,11 +776,17 @@ export class Pop {
 
         this.innerTrigFunc = finalScale === 0 ? Math.cos : Math.sin;
         /**@type {mapboxgl.SymbolLayer} */
-        this.layer = findLayer(map, layerId);
+        this.layerId = layerId;
 
         this.zValue = maxVsEnd;
         this.aValue = Math.PI / 2 + Math.asin(Math.sqrt(1 - this.zValue));
         this.finalScale = finalScale;
+    }
+
+    frameZeroSetup() {
+        if (this.finalScale === 0) {
+            this.finalScale = map.getLayoutProperty(this.layerId, "icon-size");
+        }
     }
 
     get frameIdx() {
@@ -763,10 +809,11 @@ export class Pop {
 
     step() {
         if (this.frameIdx < 0) return ANIM_CONTINUE;
+        if (this.frameIdx === 0) this.frameZeroSetup();
         if (this.frameIdx >= this.totalFrameCount) return ANIM_END;
 
         map.setLayoutProperty(
-            this.layer.id,
+            this.layerId,
             "icon-size",
             this.finalScale * this.percentage(this.frameIdx + 1)
         );
@@ -860,5 +907,34 @@ export class SetSourceCoords {
         src._data.geometry.coordinates = this.newCoords;
         src.setData(src._data);
         return ANIM_END;
+    }
+}
+
+/**
+ * @implements {import("./types").Animation}
+ */
+export class Script {
+    /**
+     * @param {import("./types").ScriptOpts} opts
+     */
+    constructor(opts) {
+        const { startAtTimeSec, frames = 1, execute } = opts;
+        this.startOnFrame = Math.round(startAtTimeSec * FPS);
+        this.frameCount = frames;
+        this.execute = execute;
+    }
+
+    get frameIdx() {
+        return realFrameCounter - this.startOnFrame;
+    }
+
+    get endFrameIdx() {
+        return this.startOnFrame + this.frameCount;
+    }
+
+    step() {
+        if (this.frameIdx < 0) return ANIM_CONTINUE;
+        if (this.frameIdx >= this.frameCount) return ANIM_END;
+        this.execute();
     }
 }

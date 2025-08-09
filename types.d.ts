@@ -1,4 +1,4 @@
-import mapboxgl, { SymbolPaint } from "maplibre-gl";
+import mapboxgl, { AnyPaint, LinePaint, SymbolPaint } from "maplibre-gl";
 
 declare global {
     var map: mapboxgl.Map;
@@ -22,6 +22,7 @@ type DrawLineOpts = {
     seconds?: number;
     headPointSourceId?: string;
     maxTrailingPoints?: NonZeroNumber;
+    easing?: boolean;
 };
 
 type DrawDottedLineOpts = {
@@ -89,12 +90,14 @@ type PopOpts = {
     seconds?: NonZeroNumber;
 };
 
+type KeysOfUnion<T> = T extends any ? keyof T : never;
 type LinearAdjustOpts = {
     startAtTimeSec: NonZeroNumber;
     layerId: string;
-    paintProperty: keyof SymbolPaint;
+    paintProperty: KeysOfUnion<AnyPaint>;
     newValue: number;
     seconds?: number;
+    easing?: boolean;
 };
 
 type SetSourceCoordsOpts = {
@@ -103,10 +106,24 @@ type SetSourceCoordsOpts = {
     newCoords: [number, number];
 };
 
+type ScriptOpts = {
+    startAtTimeSec: NonZeroNumber;
+    frames?: NonZeroNumber;
+    execute: () => void;
+};
+
 type AddImageOpts = {
     imgName: string;
     coords: [number, number] | [number, number][];
     layoutOverrides?: mapboxgl.SymbolLayout;
     paintOverrides?: mapboxgl.SymbolPaint;
     beforeLayer?: string;
+};
+
+type AddLineOpts = {
+    lineName: string;
+    coords?: [number, number][];
+    paintOverrides?: mapboxgl.LinePaint;
+    casingPaintOverrides?: mapboxgl.LinePaint;
+    casing?: boolean;
 };
