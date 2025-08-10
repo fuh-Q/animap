@@ -126,4 +126,5 @@ type AddLineOpts = {
     paintOverrides?: mapboxgl.LinePaint;
     casingPaintOverrides?: mapboxgl.LinePaint;
     casing?: boolean;
+    beforeLayer?: string;
 };

@@ -121,6 +121,7 @@ function addLine(opts) {
         paintOverrides = {},
         casingPaintOverrides = {},
         casing = true,
+        beforeLayer,
     } = opts;
 
     const defaultPaint = {
@@ -143,12 +144,13 @@ function addLine(opts) {
             coords: coords.map((r) => [...r]),
             paintOverrides: casingPaint,
             casing: false,
+            beforeLayer,
         });
     }
 
     const [src, layer] = [`${lineName}source-${hex(6)}`, `${lineName}layer-${hex(6)}`];
     map.addSource(src, newFeature({ type: "LineString", coordinates: coords }));
-    map.addLayer(newLineLayer(layer, src, paint));
+    map.addLayer(newLineLayer(layer, src, paint), beforeLayer);
 
     return [src, layer, caseSrc, caseLayer];
 }
@@ -414,6 +416,7 @@ exportedAnimation = async function WestboroToTunneys() {
         newLineLayer("caseLineToTunneysLayer", "caseLineToTunneys", {
             "line-color": "#363638",
             "line-width": 17,
+            "line-opacity": 1,
         }),
         westboroLayer
     );
@@ -422,6 +425,7 @@ exportedAnimation = async function WestboroToTunneys() {
         newLineLayer("lineToTunneysLayer", "lineToTunneys", {
             "line-color": "#6E6E70",
             "line-width": 12,
+            "line-opacity": 1,
         }),
         westboroLayer
     );
@@ -454,6 +458,7 @@ exportedAnimation = async function WestboroToTunneys() {
         newLineLayer("caseLine1EastLayer", "caseLine1East", {
             "line-color": "#6B140D",
             "line-width": 17,
+            "line-opacity": 1,
         }),
         tpLayer
     );
@@ -462,6 +467,7 @@ exportedAnimation = async function WestboroToTunneys() {
         newLineLayer("line1EastLayer", "line1East", {
             "line-color": "#DA291C",
             "line-width": 12,
+            "line-opacity": 1,
         }),
         tpLayer
     );
@@ -576,6 +582,20 @@ exportedAnimation = async function WestboroToTunneys() {
         }),
         new LinearAdjustNumericPaintProp({
             startAtTimeSec: 15.81,
+            layerId: "caseLineToTunneysLayer",
+            seconds: 0.5,
+            paintProperty: "line-opacity",
+            newValue: 0,
+        }),
+        new LinearAdjustNumericPaintProp({
+            startAtTimeSec: 15.81,
+            layerId: "lineToTunneysLayer",
+            seconds: 0.5,
+            paintProperty: "line-opacity",
+            newValue: 0.5,
+        }),
+        new LinearAdjustNumericPaintProp({
+            startAtTimeSec: 15.81,
             layerId: d60Layer,
             paintProperty: "icon-opacity",
             newValue: 0,
@@ -641,6 +661,20 @@ exportedAnimation = async function WestboroToTunneys() {
             paintProperty: "icon-opacity",
             newValue: 1,
             seconds: 0.4,
+        }),
+        new LinearAdjustNumericPaintProp({
+            startAtTimeSec: 21.77,
+            layerId: "caseLine1EastLayer",
+            seconds: 0.5,
+            paintProperty: "line-opacity",
+            newValue: 0,
+        }),
+        new LinearAdjustNumericPaintProp({
+            startAtTimeSec: 21.77,
+            layerId: "line1EastLayer",
+            seconds: 0.5,
+            paintProperty: "line-opacity",
+            newValue: 0.5,
         }),
     ]);
 };
@@ -2974,7 +3008,7 @@ exportedAnimation = async function BatteryBus() {
     ]);
 };
 
-async function Boarded98() {
+exportedAnimation = async function Boarded98() {
     const BLAIR = [-75.6087562950158, 45.43125273888009];
     const GREENBORO = [-75.65852536768337, 45.35983385046205];
     const HURDMAN = [-75.6647196345966, 45.412172356662325];
@@ -3363,9 +3397,9 @@ async function Boarded98() {
             headPointSourceId: the98,
         }),
     ]);
-}
+};
 
-async function Transfer() {
+exportedAnimation = async function Transfer() {
     const WALKLEY = [-75.66714591895389, 45.36884539509549];
     const APPROACH_98 = [
         [-75.65910718103483, 45.36104260185141],
@@ -3595,9 +3629,9 @@ async function Transfer() {
             seconds: 1.15,
         }),
     ]);
-}
+};
 
-async function TerminatesAtBillings() {
+exportedAnimation = async function TerminatesAtBillings() {
     const WALKLEY = [-75.66714591895389, 45.36884539509549];
     const TRUNK = [
         [-75.66766260662496, 45.36926894796116],
@@ -3782,9 +3816,9 @@ async function TerminatesAtBillings() {
             layerId: hurdL,
         }),
     ]);
-}
+};
 
-async function InveroPlans() {
+exportedAnimation = async function InveroPlans() {
     const HURDMAN = [-75.66475118397643, 45.412178604538326];
 
     //-75.66479409933379, 45.41340079997153
@@ -3852,9 +3886,9 @@ async function InveroPlans() {
             newValue: 1,
         }),
     ]);
-}
+};
 
-async function MoreInveroPlans() {
+exportedAnimation = async function MoreInveroPlans() {
     const HURDMAN = [-75.66475118397643, 45.412178604538326];
     const LYCEE_SOUTH = [-75.66438047086106, 45.406520776023115];
     const LYCEE_NORTH = [-75.66435780765813, 45.406518324531845];
@@ -4331,9 +4365,9 @@ async function MoreInveroPlans() {
             sourceId: "blinker3",
         }),
     ]);
-}
+};
 
-async function PassedThe45() {
+exportedAnimation = async function PassedThe45() {
     const LYCEE_NORTH = [-75.66435780765813, 45.406518324531845];
 
     const THE_88 = [
@@ -4493,9 +4527,9 @@ async function PassedThe45() {
             headPointSourceId: the45,
         }),
     ]);
-}
+};
 
-async function PotentialNewPlan() {
+exportedAnimation = async function PotentialNewPlan() {
     const HURDMAN = [-75.66475118397643, 45.412178604538326];
     const LYCEE_NORTH = [-75.66435780765813, 45.406518324531845];
 
@@ -4881,6 +4915,397 @@ async function PotentialNewPlan() {
             newValue: 0.5,
         }),
     ]);
-}
+};
+
+exportedAnimation = async function CompleteRoute() {
+    const WESTBORO = [-75.75195551876531, 45.396297965988964];
+    const [_, wbL] = await addImage({
+        imgName: "westboro-card",
+        coords: WESTBORO,
+        layoutOverrides: { "icon-size": 0.1 },
+    });
+
+    const TUNNEYS_C = [-75.73555341026608, 45.403862161749544];
+    const TUNNEYS = [-75.73516654954759, 45.40375459061113];
+    await addImage({
+        imgName: "tp-card-upside",
+        coords: [-75.73539636779655, 45.403757279892005],
+        layoutOverrides: { "icon-size": 0.1 },
+    });
+
+    const BAYVIEW = [-75.72210385090816, 45.40937730348287];
+    await addImage({
+        imgName: "bayview-card-upside",
+        coords: BAYVIEW,
+        layoutOverrides: { "icon-size": 0.1 },
+    });
+
+    const CORSO = [-75.71406140881855, 45.403923839853775];
+    await addImage({
+        imgName: "corso-card",
+        coords: CORSO,
+        layoutOverrides: { "icon-size": 0.1 },
+    });
+
+    const BRONSON = [-75.7034016163112, 45.40742377622189];
+    await addImage({
+        imgName: "bronson-card-upside",
+        coords: BRONSON,
+        layoutOverrides: { "icon-size": 0.1 },
+    });
+
+    const CARLETON = [-75.69624007743339, 45.38571310420076];
+    await addImage({
+        imgName: "carleton-card",
+        coords: CARLETON,
+        layoutOverrides: { "icon-size": 0.1 },
+    });
+
+    const GREENBORO = [-75.65874288957103, 45.359885398144286];
+    await addImage({
+        imgName: "greenboro-card",
+        coords: GREENBORO,
+        layoutOverrides: { "icon-size": 0.1 },
+    });
+
+    const WALKLEY = [-75.66714371380976, 45.36884515895386];
+    await addImage({
+        imgName: "walkley-card-up",
+        coords: WALKLEY,
+        layoutOverrides: { "icon-size": 0.1 },
+    });
+
+    const BILLINGS = [-75.67673571960817, 45.384660117117306];
+    await addImage({
+        imgName: "billings-card",
+        coords: BILLINGS,
+        layoutOverrides: { "icon-size": 0.1 },
+    });
+
+    const LYCEE = [-75.66435460757678, 45.40651827219628];
+    await addImage({
+        imgName: "lycee-card-upside",
+        coords: LYCEE,
+        layoutOverrides: { "icon-size": 0.1 },
+    });
+
+    const HURDMAN = [-75.66466221564603, 45.41216533699378];
+    await addImage({
+        imgName: "hurdman-card",
+        coords: HURDMAN,
+        layoutOverrides: { "icon-size": 0.1 },
+    });
+    const INDY = [-75.65871317847524, 45.412291960914445];
+    await addImage({
+        imgName: "indy-card",
+        coords: INDY,
+        layoutOverrides: { "icon-size": 0.1 },
+    });
+
+    const WB2TP = [
+        WESTBORO,
+        [-75.75178220320154, 45.39637766322491],
+        [-75.7508784512641, 45.39675263816909],
+        [-75.73761009760356, 45.40235530741296],
+        [-75.73737126992667, 45.40247355432879],
+        [-75.7373953510738, 45.40254456750972],
+        [-75.73760726516883, 45.40290132285125],
+        [-75.73751575681037, 45.403036584951025],
+        [-75.73549627849057, 45.4038879041355],
+        TUNNEYS_C,
+    ];
+    addLine({
+        lineName: "WB2TP",
+        coords: WB2TP,
+        paintOverrides: { "line-color": "#6e6e70", "line-opacity": 0.7 },
+        casing: false,
+        beforeLayer: wbL,
+    });
+    const TP2BY = [
+        TUNNEYS,
+        [-75.73410073902191, 45.40420539139913],
+        [-75.73238296731847, 45.40492492498581],
+        [-75.73051661793379, 45.405639516612354],
+        [-75.72771895305878, 45.40682512062193],
+        [-75.72316640971009, 45.408737477903884],
+        BAYVIEW,
+    ];
+    addLine({
+        lineName: "TP2BY",
+        coords: TP2BY,
+        paintOverrides: { "line-color": "#DA291C", "line-opacity": 0.7 },
+        casing: false,
+        beforeLayer: wbL,
+    });
+    const BY2CR = [
+        BAYVIEW,
+        [-75.72167798324763, 45.40908296791821],
+        [-75.71942084793822, 45.407546983737404],
+        [-75.71852884583949, 45.406834782024646],
+        [-75.71602281150675, 45.40521825634187],
+        [-75.71439973844805, 45.404052189995326],
+        CORSO,
+    ];
+    addLine({
+        lineName: "BY2CR",
+        coords: BY2CR,
+        paintOverrides: { "line-color": "#65A233", "line-opacity": 0.7 },
+        casing: false,
+        beforeLayer: wbL,
+    });
+    const CR2BR = [
+        CORSO,
+        [-75.71329317260759, 45.40420654764333],
+        [-75.71144173185628, 45.40477907749536],
+        [-75.70894543710851, 45.4054907426092],
+        [-75.70834583217231, 45.405870210423785],
+        [-75.70716637552698, 45.40650244883429],
+        [-75.70567675645067, 45.407016183277904],
+        [-75.70368963208928, 45.40787410149997],
+        BRONSON,
+    ];
+    map.addSource("dottedLine", newFeatureCollection([]));
+    map.addLayer(
+        {
+            id: "dottedLineLayer",
+            source: "dottedLine",
+            type: "circle",
+            paint: {
+                "circle-radius": 8,
+                "circle-color": "#6e6e70",
+                "circle-stroke-width": 0,
+                "circle-opacity": 0.7,
+            },
+        },
+        wbL
+    );
+    const BR2CL = [
+        BRONSON,
+        [-75.70244216522845, 45.40573686678579],
+        [-75.70188170387944, 45.404628154841504],
+        [-75.70159456912562, 45.40430500733237],
+        [-75.69981499341458, 45.40118564347017],
+        [-75.69700507191347, 45.396366788840226],
+        [-75.69630075123499, 45.395052725268016],
+        [-75.69608244625636, 45.393357965392624],
+        [-75.69584598866075, 45.39249004848554],
+        [-75.69487280991834, 45.3911134062146],
+        [-75.6942685299128, 45.39016598146276],
+        [-75.69419932739657, 45.389863023807095],
+        [-75.69580137206356, 45.38908335609702],
+        [-75.6960613529964, 45.38904881360827],
+        [-75.69621593625382, 45.388876100845835],
+        [-75.69696777300533, 45.38860469401067],
+        [-75.69667914126521, 45.38800639707466],
+        [-75.69653892534629, 45.387581402717984],
+        [-75.69640679816922, 45.3868566006214],
+        CARLETON,
+    ];
+    addLine({
+        lineName: "BR2CL",
+        coords: BR2CL,
+        paintOverrides: { "line-color": "#0056B8", "line-opacity": 0.7 },
+        casing: false,
+        beforeLayer: wbL,
+    });
+    const CL2GB = [
+        CARLETON,
+        [-75.69599046194297, 45.38481525151818],
+        [-75.6960167958891, 45.38416356188864],
+        [-75.69585715284843, 45.38346493093624],
+        [-75.69549754097034, 45.38279450608738],
+        [-75.69463792459575, 45.381466205207914],
+        [-75.69394829060876, 45.380704748539245],
+        [-75.69307423512544, 45.380149426379916],
+        [-75.66800190592481, 45.37006414755788],
+        [-75.66734923645605, 45.36975122110195],
+        [-75.6660979312747, 45.36895016209809],
+        [-75.6643106209052, 45.367525602203244],
+        [-75.66337029097608, 45.36661006925027],
+        [-75.66289080861988, 45.36610351557596],
+        [-75.66240213322398, 45.36530760696675],
+        GREENBORO,
+    ];
+    addLine({
+        lineName: "CL2GB",
+        coords: CL2GB,
+        paintOverrides: { "line-color": "#65A233", "line-opacity": 0.7 },
+        casing: false,
+        beforeLayer: wbL,
+    });
+    const GB2WK = [
+        GREENBORO,
+        [-75.65883731142492, 45.36066449290345],
+        [-75.6591023334469, 45.36102259855588],
+        [-75.65949307104363, 45.36123029879596],
+        [-75.66098391782626, 45.36194513221983],
+        [-75.6615173595883, 45.362346201320065],
+        [-75.66195286666134, 45.36295655930704],
+        [-75.66259996531346, 45.36403904433044],
+        [-75.66338587024946, 45.36513061298771],
+        [-75.66430665189662, 45.366186764237796],
+        [-75.66549293013449, 45.367395112838466],
+        [-75.66655955411733, 45.36836019250299],
+        WALKLEY,
+    ];
+    addLine({
+        lineName: "GB2WK",
+        coords: GB2WK,
+        paintOverrides: { "line-color": "#0056B8", "line-opacity": 0.7 },
+        casing: false,
+        beforeLayer: wbL,
+    });
+    const WK2BB = [
+        WALKLEY,
+        [-75.66828140661777, 45.369678202145565],
+        [-75.66917756494952, 45.370184293522556],
+        [-75.67072328274934, 45.37082616172111],
+        [-75.678636022046, 45.374011856921044],
+        [-75.67931902963905, 45.37441772530573],
+        [-75.67986673553239, 45.374909540834324],
+        [-75.68020089055948, 45.375529323881636],
+        [-75.68025964417865, 45.37616169681425],
+        [-75.68015238169028, 45.37695656739169],
+        [-75.67992493603944, 45.37797481407031],
+        [-75.67934300442005, 45.37970625264458],
+        [-75.67879334203488, 45.38052596539316],
+        [-75.67838727317738, 45.38116955220241],
+        [-75.67840882620027, 45.381643891875626],
+        [-75.67861852277062, 45.382400771767294],
+        [-75.67858260106559, 45.38265307510494],
+        [-75.67882686865997, 45.382764088216874],
+        [-75.67898492416217, 45.382965929679955],
+        [-75.67897725017804, 45.38335619198406],
+        [-75.6785533740586, 45.38366399670329],
+        BILLINGS,
+    ];
+    addLine({
+        lineName: "WK2BB",
+        coords: WK2BB,
+        paintOverrides: { "line-color": "#0056B8", "line-opacity": 0.7 },
+        casing: false,
+        beforeLayer: wbL,
+    });
+    const BB2LY = [
+        BILLINGS,
+        [-75.67541686518905, 45.38562840420326],
+        [-75.67391236481689, 45.386957159614155],
+        [-75.67236056662126, 45.388455449642095],
+        [-75.67165806168896, 45.389167469347655],
+        [-75.67088341754594, 45.39012965112866],
+        [-75.67007847224161, 45.391343197767895],
+        [-75.66913360013643, 45.39307099484674],
+        [-75.6689757425679, 45.39363588544472],
+        [-75.6691260466556, 45.39394441057914],
+        [-75.66966945374104, 45.39448432551205],
+        [-75.67002290829498, 45.3948583649466],
+        [-75.67007493663264, 45.39519529949678],
+        [-75.66965292899789, 45.39607612407272],
+        [-75.66895491321199, 45.39739990321911],
+        [-75.66829173151632, 45.39827506971707],
+        [-75.66789829132287, 45.398865775194196],
+        [-75.66742425535479, 45.399961742255414],
+        [-75.66620438933872, 45.40184571463749],
+        [-75.66501734652198, 45.40372506412504],
+        [-75.66468428708554, 45.404535945316326],
+        [-75.66444442574986, 45.405639325518706],
+        LYCEE,
+    ];
+    addLine({
+        lineName: "BB2LY",
+        coords: BB2LY,
+        paintOverrides: { "line-color": "#0056B8", "line-opacity": 0.7 },
+        casing: false,
+        beforeLayer: wbL,
+    });
+    const LY2HD = [
+        LYCEE,
+        [-75.664191236823, 45.407868085028184],
+        [-75.66414515527048, 45.40861511248815],
+        [-75.66411993462891, 45.41085519128475],
+        [-75.66413594572505, 45.41198056278813],
+        [-75.66428675807919, 45.41215701401131],
+        [-75.66449621968238, 45.41219524503663],
+        HURDMAN,
+    ];
+    addLine({
+        lineName: "LY2HD",
+        coords: LY2HD,
+        paintOverrides: { "line-color": "#6e6e70", "line-opacity": 0.7 },
+        casing: false,
+        beforeLayer: wbL,
+    });
+    const HD2IN = [
+        HURDMAN,
+        [-75.66437076600083, 45.41234785487913],
+        [-75.66397616243073, 45.41228659127026],
+        [-75.66388404398896, 45.41198197400422],
+        [-75.66304285716652, 45.411954745565],
+        [-75.66220500363445, 45.41201703906694],
+        [-75.66118845901644, 45.41219261149658],
+        [-75.66078103438812, 45.41236818338095],
+        [-75.66036599389103, 45.41243897834485],
+        INDY,
+    ];
+    map.addSource("dottedLine2", newFeatureCollection([]));
+    map.addLayer(
+        {
+            id: "dottedLine2Layer",
+            source: "dottedLine",
+            type: "circle",
+            paint: {
+                "circle-radius": 8,
+                "circle-color": "#6e6e70",
+                "circle-stroke-width": 0,
+                "circle-opacity": 0.7,
+            },
+        },
+        wbL
+    );
+    const IN2HD = [
+        INDY,
+        [-75.6604842377993, 45.41238937763478],
+        [-75.66090376414955, 45.41240070483022],
+        [-75.66106915434514, 45.41231291900658],
+        [-75.66136362957194, 45.412131683326834],
+        [-75.66164196916975, 45.41202973800159],
+        [-75.66242842852574, 45.41195755799984],
+        [-75.66414210895454, 45.411894306261985],
+        [-75.6641784141196, 45.41202740183013],
+        [-75.6643115330572, 45.412154833463376],
+        [-75.66451322841783, 45.41219164699302],
+        HURDMAN,
+    ];
+    addLine({
+        lineName: "IN2HD",
+        coords: IN2HD,
+        paintOverrides: { "line-color": "#6e6e70", "line-opacity": 0.7 },
+        casing: false,
+        beforeLayer: wbL,
+    });
+
+    return new Set([
+        new MapViewAdjustment({
+            startAtTimeSec: 0,
+            seconds: 0,
+            newPanCoords: [-75.69469123249462, 45.385277323266024],
+            newZoom: 12.94,
+        }),
+        new DottedLineAnimation({
+            startAtTimeSec: 0,
+            seconds: 0,
+            coords: CR2BR,
+            sourceId: "dottedLine",
+            dotSpacing: 0.001,
+        }),
+        new DottedLineAnimation({
+            startAtTimeSec: 0,
+            seconds: 0,
+            coords: HD2IN,
+            sourceId: "dottedLine2",
+            dotSpacing: 0.001,
+        }),
+    ]);
+};
 
 export default exportedAnimation;
