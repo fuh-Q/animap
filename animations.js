@@ -4821,7 +4821,6 @@ exportedAnimation = async function PotentialNewPlan() {
             sourceId: "blinker",
             secondsPerRing: 0.4,
             rings: 2,
-            ringLayerBefore: indyL,
         }),
         new LinearAdjustNumericPaintProp({
             startAtTimeSec: 14.38333,
@@ -4917,7 +4916,7 @@ exportedAnimation = async function PotentialNewPlan() {
     ]);
 };
 
-async function CompleteRoute() {
+exportedAnimation = async function CompleteRoute() {
     const WESTBORO = [-75.75195551876531, 45.396297965988964];
     const [_, wbL] = await addImage({
         imgName: "westboro-card",
@@ -5306,6 +5305,6 @@ async function CompleteRoute() {
             dotSpacing: 0.001,
         }),
     ]);
-}
+};
 
 export default exportedAnimation;
