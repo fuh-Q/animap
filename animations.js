@@ -10,7 +10,7 @@ import {
     LinearAdjustNumericPaintProp,
     Script,
 } from "./drawing.js";
-import { hex, sleep } from "./utils.js";
+import { hex } from "./utils.js";
 
 let exportedAnimation;
 
@@ -68,7 +68,7 @@ const newLineLayer = (id, source, paint) => {
 
 /**
  * @param {import("./types").AddImageOpts} opts
- * @returns {[string, string]} sourceId, layerId
+ * @returns {Promise<[string, string]>} sourceId, layerId
  */
 async function addImage(opts) {
     const { imgName, coords, layoutOverrides = {}, paintOverrides = {}, beforeLayer } = opts;
@@ -4821,7 +4821,7 @@ exportedAnimation = async function PotentialNewPlan() {
             sourceId: "blinker",
             secondsPerRing: 0.4,
             rings: 2,
-            beforeLayer: indyL,
+            ringLayerBefore: indyL,
         }),
         new LinearAdjustNumericPaintProp({
             startAtTimeSec: 14.38333,
@@ -4851,7 +4851,7 @@ exportedAnimation = async function PotentialNewPlan() {
         }),
         new Blink({
             startAtTimeSec: 17.11666,
-            ringLayerBefore: hurdUpL,
+            ringLayerBefore: walkLayer,
             secondsPerRing: 0.4,
             rings: 2,
             sourceId: "blinker",
@@ -4895,7 +4895,7 @@ exportedAnimation = async function PotentialNewPlan() {
         }),
         new Blink({
             startAtTimeSec: 19.25,
-            ringLayerBefore: hurdUpL,
+            ringLayerBefore: hurdDownL,
             secondsPerRing: 0.4,
             rings: 2,
             sourceId: "blinker2",
@@ -4917,7 +4917,7 @@ exportedAnimation = async function PotentialNewPlan() {
     ]);
 };
 
-exportedAnimation = async function CompleteRoute() {
+async function CompleteRoute() {
     const WESTBORO = [-75.75195551876531, 45.396297965988964];
     const [_, wbL] = await addImage({
         imgName: "westboro-card",
@@ -5306,6 +5306,6 @@ exportedAnimation = async function CompleteRoute() {
             dotSpacing: 0.001,
         }),
     ]);
-};
+}
 
 export default exportedAnimation;
