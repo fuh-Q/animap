@@ -6,18 +6,31 @@ import { initRouteEditor } from "./route-editor.js";
 import { FPS } from "./drawing.js";
 import { sleep } from "./utils.js";
 
+const map = new maplibregl.Map({
+    style: "./positron.json",
+    attributionControl: false,
+    center: [-75.6975406016469, 45.411484269277736],
+    zoom: 6,
+    container: "map",
+    antialias: true,
+});
+
+const canvas = map.getCanvas();
+const scale = 3; // supersampling factor
+
+canvas.width = canvas.clientWidth * scale;
+canvas.height = canvas.clientHeight * scale;
+map.resize();
+
+window.realFrameCounter = 0;
+window.map = map;
+
 const render = document.cookie.startsWith("render");
 
 document.addEventListener("keyup", (e) => {
     if (!(e.key === "Enter" && e.ctrlKey)) return;
     if (!render) document.cookie = "render";
     location.reload();
-});
-
-let stopAnim = false;
-document.addEventListener("keyup", (e) => {
-    if (e.key !== " ") return;
-    stopAnim = !stopAnim;
 });
 
 if (render) {
@@ -31,6 +44,30 @@ if (render) {
         location.reload();
     });
 }
+
+if (!render) initRouteEditor();
+let stopAnim = false;
+
+document.addEventListener("keyup", (e) => {
+    if (e.key !== " ") return;
+    stopAnim = !stopAnim;
+});
+
+map.on("zoom", (_) => {
+    if (render) return;
+    document.getElementById("zoom").innerText = `zoom: ${Math.round(map.getZoom() * 100) / 100}`;
+});
+
+map.on("click", (e) => {
+    console.log(`clicked at: (${e.lngLat.lng}, ${e.lngLat.lat})`);
+    navigator.clipboard.writeText(`${e.lngLat.lng}, ${e.lngLat.lat}`);
+});
+
+document.addEventListener("auxclick", (_) => {
+    const ctr = map.getCenter();
+    console.log(`copied center: (${ctr.lng}, ${ctr.lat})`);
+    navigator.clipboard.writeText(`${ctr.lng}, ${ctr.lat}`);
+});
 
 /**
  * @param {Blob[]} frames
@@ -51,93 +88,50 @@ async function captureFrameTo(frames) {
     });
 }
 
-async function init() {
-    const map = new maplibregl.Map({
-        style: "./positron.json",
-        attributionControl: false,
-        center: [-75.6975406016469, 45.411484269277736],
-        zoom: 6,
-        container: "map",
-        antialias: true,
-    });
+map.on("load", async () => {
+    const ANIM_MAX_SECONDS = Infinity;
+    let animations = await animationInitializer();
 
-    const canvas = map.getCanvas();
-    const scale = 3; // supersampling factor
+    const frames = [];
 
-    canvas.width = canvas.clientWidth * scale;
-    canvas.height = canvas.clientHeight * scale;
-    map.resize();
+    let highestFrame = Math.max(...[...animations].map((a) => a.endFrameIdx));
+    console.log("highest frame: ", highestFrame);
 
-    window.realFrameCounter = 0;
-    window.map = map;
+    while (animations.size && realFrameCounter <= ANIM_MAX_SECONDS * FPS) {
+        if (stopAnim) break;
 
-    if (!render) initRouteEditor();
-
-    map.on("load", async () => {
-        const ANIM_MAX_SECONDS = Infinity;
-        let animations = await animationInitializer();
-
-        const frames = [];
-
-        let highestFrame = Math.max(...[...animations].map((a) => a.endFrameIdx));
-        console.log("highest frame: ", highestFrame);
-
-        while (animations.size && realFrameCounter <= ANIM_MAX_SECONDS * FPS) {
-            if (stopAnim) break;
-
-            animations.forEach((animation) => {
-                const thisOnefinished = animation.step();
-                if (thisOnefinished) animations.delete(animation);
-            });
-
-            document.title = `${realFrameCounter} / ~${highestFrame}`;
-            if (!render) await sleep("requestAnimationFrame");
-            else await captureFrameTo(frames);
-            realFrameCounter++;
-        }
-
-        if (!stopAnim) document.title = "Finished";
-
-        if (!render) return;
-
-        // for Kdenlive, allows me to freeze the last frame
-        await captureFrameTo(frames);
-        await captureFrameTo(frames);
-
-        const zip = new JSZip();
-        frames.forEach((blob, index) => {
-            zip.file(`frame_${String(index).padStart(4, "0")}.jpeg`, blob);
+        animations.forEach((animation) => {
+            const thisOnefinished = animation.step();
+            if (thisOnefinished) animations.delete(animation);
         });
 
-        const content = await zip.generateAsync({ type: "blob" });
-        const url = URL.createObjectURL(content);
+        document.title = `${realFrameCounter} / ~${highestFrame}`;
+        if (!render) await sleep("requestAnimationFrame");
+        else await captureFrameTo(frames);
+        realFrameCounter++;
+    }
 
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "frames.zip";
-        a.click();
+    if (!stopAnim) document.title = "Finished";
 
-        // clean up
-        URL.revokeObjectURL(url);
+    if (!render) return;
+
+    // for Kdenlive, allows me to freeze the last frame
+    await captureFrameTo(frames);
+    await captureFrameTo(frames);
+
+    const zip = new JSZip();
+    frames.forEach((blob, index) => {
+        zip.file(`frame_${String(index).padStart(4, "0")}.jpeg`, blob);
     });
 
-    map.on("zoom", (_) => {
-        if (render) return;
-        document.getElementById("zoom").innerText = `zoom: ${
-            Math.round(map.getZoom() * 100) / 100
-        }`;
-    });
+    const content = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(content);
 
-    map.on("click", (e) => {
-        console.log(`clicked at: (${e.lngLat.lng}, ${e.lngLat.lat})`);
-        navigator.clipboard.writeText(`${e.lngLat.lng}, ${e.lngLat.lat}`);
-    });
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "frames.zip";
+    a.click();
 
-    document.addEventListener("auxclick", (_) => {
-        const ctr = map.getCenter();
-        console.log(`copied center: (${ctr.lng}, ${ctr.lat})`);
-        navigator.clipboard.writeText(`${ctr.lng}, ${ctr.lat}`);
-    });
-}
-
-init();
+    // clean up
+    URL.revokeObjectURL(url);
+});
