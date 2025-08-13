@@ -12,7 +12,7 @@ import {
     MapViewAdjustment,
     Rotation,
     Pop,
-    SetSourceCoords,
     LinearAdjustNumericPaintProp,
     Script,
 } from "./drawing.js";
+import { addImage, addLine, newLineLayer, newFeature, newFeatureCollection } from "./utils.js";
