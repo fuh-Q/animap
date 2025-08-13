@@ -29,10 +29,7 @@ function getRouteLength(coords) {
     return sum;
 }
 
-/**
- * @param {mapboxgl.Map} map
- */
-export function initRouteEditor(map) {
+export function initRouteEditor() {
     document.addEventListener("keyup", (e) => {
         if (e.key !== "c") return;
 

@@ -71,7 +71,7 @@ async function init() {
     window.realFrameCounter = 0;
     window.map = map;
 
-    if (!render) initRouteEditor(map);
+    if (!render) initRouteEditor();
 
     map.on("load", async () => {
         const ANIM_MAX_SECONDS = Infinity;
