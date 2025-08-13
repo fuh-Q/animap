@@ -1,6 +1,6 @@
 /**
  * animation code goes here
- * to run an animation, you `export default` an async function in the form `() => Promise<Set<Animation>>`
+ * to run an animation, you `export default` a function in the form `async () => Set<Animation>`
  * where the Animation is any of the exported classes from `./drawing.js
  */
 
