@@ -881,38 +881,6 @@ export class LinearAdjustNumericPaintProp {
 /**
  * @implements {import("./types").Animation}
  */
-export class SetSourceCoords {
-    /**
-     * @param {import("./types").SetSourceCoordsOpts} opts
-     */
-    constructor(opts) {
-        const { startAtTimeSec, sourceId, newCoords } = opts;
-        this.startOnFrame = Math.round(startAtTimeSec * FPS);
-        this.sourceId = sourceId;
-        this.newCoords = newCoords;
-    }
-
-    get frameIdx() {
-        return realFrameCounter - this.startOnFrame;
-    }
-
-    get endFrameIdx() {
-        return this.startOnFrame + 1;
-    }
-
-    step() {
-        if (this.frameIdx < 0) return ANIM_CONTINUE;
-
-        const src = map.getSource(this.sourceId);
-        src._data.geometry.coordinates = this.newCoords;
-        src.setData(src._data);
-        return ANIM_END;
-    }
-}
-
-/**
- * @implements {import("./types").Animation}
- */
 export class Script {
     /**
      * @param {import("./types").ScriptOpts} opts

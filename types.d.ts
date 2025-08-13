@@ -100,12 +100,6 @@ type LinearAdjustOpts = {
     easing?: boolean;
 };
 
-type SetSourceCoordsOpts = {
-    startAtTimeSec: NonZeroNumber;
-    sourceId: string;
-    newCoords: [number, number];
-};
-
 type ScriptOpts = {
     startAtTimeSec: NonZeroNumber;
     frames?: NonZeroNumber;
