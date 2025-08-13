@@ -1,7 +1,10 @@
 node_modules/
 .vscode/
 **/*.mp4
-assets/*.png
 **/*.jpeg
 **/*.jpg
 venv/
+route-icons/
+assets/
+vo-scripts/
+renders/

@@ -1,4 +1,4 @@
-import mapboxgl, { AnyPaint, LinePaint, SymbolPaint } from "maplibre-gl";
+import mapboxgl from "maplibre-gl";
 
 declare global {
     var map: mapboxgl.Map;
@@ -94,7 +94,7 @@ type KeysOfUnion<T> = T extends any ? keyof T : never;
 type LinearAdjustOpts = {
     startAtTimeSec: NonZeroNumber;
     layerId: string;
-    paintProperty: KeysOfUnion<AnyPaint>;
+    paintProperty: KeysOfUnion<mapboxgl.AnyPaint>;
     newValue: number;
     seconds?: number;
     easing?: boolean;

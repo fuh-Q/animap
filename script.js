@@ -53,7 +53,7 @@ async function captureFrameTo(frames) {
 
 async function init() {
     const map = new maplibregl.Map({
-        style: "/positron.json",
+        style: "./positron.json",
         attributionControl: false,
         center: [-75.6975406016469, 45.411484269277736],
         zoom: 6,
@@ -74,7 +74,6 @@ async function init() {
     if (!render) initRouteEditor(map);
 
     map.on("load", async () => {
-        console.log(map.painter.context.gl.getContextAttributes().antialias);
         const ANIM_MAX_SECONDS = Infinity;
         let animations = await animationInitializer();
 

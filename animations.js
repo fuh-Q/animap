@@ -12,6 +12,7 @@ import {
 } from "./drawing.js";
 import { hex } from "./utils.js";
 
+/**@type {() => Promise<Set<import("./types").Animation>>} */
 let exportedAnimation;
 
 /**
