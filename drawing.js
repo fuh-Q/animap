@@ -312,6 +312,9 @@ export class DottedLineAnimation {
  * @implements {import("./types").Animation}
  */
 export class InflateDeflate {
+    /**@type {number} */
+    ogWidth;
+
     /**
      * @param {import("./types").InflateDeflateOpts} opts
      */
@@ -323,6 +326,10 @@ export class InflateDeflate {
         this.totalFrameCount = totalSeconds ? totalSeconds * FPS : null;
 
         this.layerId = layerId;
+    }
+
+    frameZeroSetup() {
+        this.ogWidth = map.getPaintProperty(this.layerId, "line-width");
     }
 
     get frameIdx() {
@@ -342,11 +349,14 @@ export class InflateDeflate {
 
     step() {
         if (this.frameIdx < 0) return ANIM_CONTINUE;
-        if (this.totalFrameCount !== null && realFrameCounter >= this.totalFrameCount)
-            return ANIM_END;
+        if (this.frameIdx === 0) this.frameZeroSetup();
+        if (this.totalFrameCount !== null && this.frameIdx >= this.totalFrameCount) return ANIM_END;
 
-        const width = map.getPaintProperty(this.layerId, "line-width");
-        map.setPaintProperty(this.layerId, "line-width", width * this.width(this.frameIdx + 1));
+        map.setPaintProperty(
+            this.layerId,
+            "line-width",
+            this.ogWidth * this.width(this.frameIdx + 1)
+        );
 
         return ANIM_CONTINUE;
     }
