@@ -4,7 +4,3 @@ node_modules/
 **/*.jpeg
 **/*.jpg
 venv/
-route-icons/
-assets/
-vo-scripts/
-renders/
