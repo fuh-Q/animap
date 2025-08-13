@@ -4,7 +4,6 @@ declare global {
     var map: mapboxgl.Map;
     var maplibregl: typeof mapboxgl;
     var realFrameCounter: number;
-    var render: boolean;
 }
 
 type NonZeroNumber = number;
