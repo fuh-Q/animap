@@ -134,7 +134,7 @@ export async function addImage(opts) {
 
 /**
  * @param {import("./types").AddLineOpts} opts
- * @returns {[string, string, string, string]} src, layer, caseSrc, caseLayer
+ * @returns {[string, string, string | undefined, string | undefined]} src, layer, caseSrc, caseLayer
  */
 export function addLine(opts) {
     const {
