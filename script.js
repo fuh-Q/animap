@@ -53,14 +53,18 @@ document.addEventListener("keyup", (e) => {
     stopAnim = !stopAnim;
 });
 
-map.on("zoom", (_) => {
+function updatePOVInfo() {
     if (render) return;
     document.getElementById("zoom").innerText = `
         zoom: ${Math.round(map.getZoom() * 100) / 100}
-        pitch: ${map.getPitch()}
-        bearing: ${map.getBearing()}
+        pitch: ${Math.round(map.getPitch() * 100) / 100}
+        bearing: ${Math.round(map.getBearing() * 100) / 100}
     `.trim();
-});
+}
+
+map.on("zoom", updatePOVInfo);
+map.on("pitch", updatePOVInfo);
+map.on("rotate", updatePOVInfo);
 
 map.on("click", (e) => {
     console.log(`clicked at: (${e.lngLat.lng}, ${e.lngLat.lat})`);
