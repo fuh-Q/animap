@@ -28,5 +28,5 @@ draw.text((x, y), route_number, fill="#" + text_colour, font=FONT)
 out_file = f"/tmp/{route_number}-{route_type}.png"
 img.save(out_file)
 webbrowser.open(f"file://{out_file}")
-time.sleep(0.2)
+time.sleep(1)  # this should be long enough for the browser to open
 os.remove(out_file)
