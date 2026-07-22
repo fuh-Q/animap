@@ -55,7 +55,11 @@ document.addEventListener("keyup", (e) => {
 
 map.on("zoom", (_) => {
     if (render) return;
-    document.getElementById("zoom").innerText = `zoom: ${Math.round(map.getZoom() * 100) / 100}`;
+    document.getElementById("zoom").innerText = `
+        zoom: ${Math.round(map.getZoom() * 100) / 100}
+        pitch: ${map.getPitch()}
+        bearing: ${map.getBearing()}
+    `.trim();
 });
 
 map.on("click", (e) => {
@@ -82,7 +86,7 @@ async function captureFrameTo(frames) {
                     resolve();
                 },
                 "image/jpeg",
-                1.0
+                1.0,
             );
         });
     });

@@ -16,3 +16,9 @@ import {
     Script,
 } from "./drawing.js";
 import { addImage, addLine, newLineLayer, newFeature, newFeatureCollection } from "./utils.js";
+
+export default async function () {
+    // write animation code here
+    // if you need an example go to the animations.js file in the speedrun-vid branch
+    return new Set();
+}

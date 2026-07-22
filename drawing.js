@@ -355,7 +355,7 @@ export class InflateDeflate {
         map.setPaintProperty(
             this.layerId,
             "line-width",
-            this.ogWidth * this.width(this.frameIdx + 1)
+            this.ogWidth * this.width(this.frameIdx + 1),
         );
 
         return ANIM_CONTINUE;
@@ -825,7 +825,7 @@ export class Pop {
         map.setLayoutProperty(
             this.layerId,
             "icon-size",
-            this.finalScale * this.percentage(this.frameIdx + 1)
+            this.finalScale * this.percentage(this.frameIdx + 1),
         );
 
         return ANIM_CONTINUE;
@@ -881,7 +881,7 @@ export class LinearAdjustNumericPaintProp {
         map.setPaintProperty(
             this.layerId,
             this.paintProperty,
-            this.currentValue(this.frameIdx + 1)
+            this.currentValue(this.frameIdx + 1),
         );
 
         return ANIM_CONTINUE;

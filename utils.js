@@ -22,7 +22,7 @@ export function findSource(map, sourceId) {
  */
 export function hex(len) {
     return Array.from(window.crypto.getRandomValues(new Uint8Array(len)), (b) =>
-        b.toString(16).padStart(2, "0")
+        b.toString(16).padStart(2, "0"),
     ).join("");
 }
 
@@ -126,7 +126,7 @@ export async function addImage(opts) {
             layout,
             paint,
         },
-        beforeLayer
+        beforeLayer,
     );
 
     return [sourceId, layerId];
